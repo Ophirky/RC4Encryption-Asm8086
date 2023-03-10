@@ -1,0 +1,28 @@
+//                   Code                      \\
+// rc4.ASM \\
+☐ write the encryption proc
+☐ write the generate stream key proc
+☐ write the key scheduling proc
+☐ write the decryption proc
+
+// scanner.asm \\
+☐ write the FolderScanAndEncrypt proc
+☐ write the FolderScanAndDecrypt proc
+☐ write the FileEncrypt proc
+☐ write the FileDecrypt proc
+
+// mainProgram.asm \\
+☐ add the user input handler
+☐ add a way for the user to encrypt a folder
+☐ add a way for the user to encrypt a file
+☐ add a way for the user to encrypt text directly from the dos
+\\----------------------------------------------//
+//                   other                      \\
+// Flow Chart \\
+☐ write the flow chart for the mainProgram file
+☐ write the flow chart for the scanner file
+
+// Project Book \\
+☐ go over the requirements and ad to the .todo file
+
+\\----------------------------------------------//

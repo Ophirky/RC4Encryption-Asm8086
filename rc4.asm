@@ -2,22 +2,38 @@
 ; Name: rc4.asm                                              ;
 ; an encryption decryption library using the rc4 encryption  ;
 
-; Key Scheduling Procedure ;
+; --------------------------------------------;
+; SUMMARY -                                   ;
+; IN -                                        ;
+; OUT -                                       ;
+; --------------------------------------------;
 proc keyScheduling
 
 endp keyScheduling
 
-; Generate Stream Key Procedure ;
+; --------------------------------------------;
+; SUMMARY -                                   ;
+; IN -                                        ;
+; OUT -                                       ;
+; --------------------------------------------;
 proc generateStreamKey
 
 endp generateStreamKey
 
-; Encryption Procedure ;
+; --------------------------------------------;
+; SUMMARY -                                   ;
+; IN -                                        ;
+; OUT -                                       ;
+; --------------------------------------------;
 proc encrypt
 
 endp encrypt
 
-; Decyrption Procedure ;
+; --------------------------------------------;
+; SUMMARY -                                   ;
+; IN -                                        ;
+; OUT -                                       ;
+; --------------------------------------------;
 proc decrypt
 
 endp decrypt
