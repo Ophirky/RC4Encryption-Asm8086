@@ -8,6 +8,11 @@
 ; OUT -                                       ;
 ; --------------------------------------------;
 proc keyScheduling
+    mov ax, 0
+    SetArray0To255:
+        mov [ax], ax        
+
+    SetArray0To255End:
 
 endp keyScheduling
 

@@ -29,7 +29,7 @@ def stream_generation(sched):
         sched[j] = sched[i]
         sched[i] = tmp
         
-        yield sched[(sched[i] + sched[j]) % 256]        
+        yield sched[(sched[i] + sched[j]) % 256]
 
 
 def encrypt(text, key):

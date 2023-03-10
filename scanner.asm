@@ -9,6 +9,7 @@
 ; OUT -                                        ;
 ; ---------------------------------------------;
 proc FolderScanAndEncrypt
+    
 endp FolderScanAndEncrypt
 
 ; ---------------------------------------------;

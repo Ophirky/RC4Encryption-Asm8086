@@ -11,3 +11,6 @@
     # Purple  -  Procedures
     # Yellow  -  Returning value 
 
+## Conventions ##
+    # sched array in global memory - ds[0-255] 
+    # key array in global memory - ds[256-511] 
