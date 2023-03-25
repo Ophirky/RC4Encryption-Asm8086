@@ -1,0 +1,24 @@
+di,bx=0
+FOR (DI <= 255) {
+    // choosing the psuedo random location in the sched array \\
+    bx += [sched Offset +di]
+    si = di
+    div si, len(key)
+    si = resedue of division
+
+    bx += [keyOffset + si]
+    div bx, 256
+    bx = resedue of division
+
+    // Switching between two items in the sched array[bx,di] \\
+    si = schedOffset
+    si += di
+
+    ax = [schedOffset + bx]
+    [si] = ax
+
+    ax = schedOffset
+    ax += bx
+    si = [si]
+    [ax] = si
+}

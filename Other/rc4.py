@@ -9,6 +9,9 @@ def key_scheduling(key):
     i = 0
     for j in range(0, 256):
         i = (i + sched[j] + key[j % len(key)]) % 256
+        i += sched[j]
+        i += key[j % len(key)]
+        i %= 256
         
         tmp = sched[j]
         sched[j] = sched[i]
