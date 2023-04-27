@@ -16,9 +16,64 @@ DATASEG
 
 ; Code ;
 CODESEG
+
+
     ; Including the librarys ;
-    include "rc4.asm" ; encryption
+    ; include "rc4.asm" ; encryption
     include "scanner.asm" ; file and folder encryption
+
+proc keyScheduling
+    ; Mixing the sched (ds[0-255]) array ;
+    schedOffset equ 0
+    keyOffset equ 256
+
+    xor bx,bx
+    xor di,di
+
+    MixSchedArray:
+        ; while di < 256 ;
+        add bl, [schedOffset+di]
+        mov si, di
+    
+        xor ax,ax
+        mov ax, di
+        mov si, [word ptr key_arr_len]
+        div si
+        mov si, dx
+    
+        add bl, [keyOffset+si]
+    
+        mov cx, 256
+        mov al, bl
+        div cx
+        mov bx, dx
+    
+        ; Switching between two items in the sched array[bx,di] ;
+        ; TMP variable ;
+        mov si, schedOffset
+        add si, di
+    
+        ; switch 1 ;
+        xor ax,ax
+        mov al, [schedOffset+di]
+        mov [si], ax
+    
+        ; switch 2 ;
+        mov si, [si]
+        mov [schedOffset + bx], si
+    
+        ; check if bx equals di, and if so, break out of loop
+        cmp bx, di
+        je DoneMixing
+    
+        ; Increasing loop counter ;
+        inc di
+        cmp di, 256
+        jb MixSchedArray
+    
+    DoneMixing:
+endp keyScheduling
+
 
     ; Start ;
     start:
@@ -27,9 +82,9 @@ CODESEG
         mov ds, ax
 
         ; PlaceHolder key ;
-        mov [offset key], 031h
-        mov [offset key+1], 021h
-        mov [offset key+2], 011h
+        mov [offset key], 31d
+        mov [offset key+1], 21d
+        mov [offset key+2], 11d
         add [key_arr_len], 3
 
 
