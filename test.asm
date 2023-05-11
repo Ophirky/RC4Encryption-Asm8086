@@ -25,7 +25,15 @@ CODESEG
 
         SetSchedArray0To255End:
 
-        ; Option 2 ;
+        ; option 1.5 ;
+        mov cl, 255d
+        SetSchedArray0To255Two:
+            mov [bl], cl
+            dec cl
+            cmp cl,0
+            ja SetSchedArray0To255Two
+
+        ; Option 2 - not working ;
         mov dx, 255d
         SetSchedArray0To255:
             mov bx, dx
