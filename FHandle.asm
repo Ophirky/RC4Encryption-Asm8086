@@ -1,12 +1,13 @@
-; Written by: Ophir Nevo Michrowski                                     ;
-; Name: Scanner.asm                                                     ;
-; this virus I MEAN FILE contains the algorithm to scan a folder given  ;
+; Written by: Ophir Nevo Michrowski                          ;
+; Name: Scanner.asm                                          ;
+; This file is the library that handles all of the file work ;
 
 ; ---------------------------------------------;
 ; SUMMARY - This opens the file in the         ;
 ;           specified format                   ;
-; IN -                                         ;
-; OUT -                                        ;
+; IN - File name, file handle, ErrorMSG        ;
+;                                              ;
+; OUT - None                                   ;
 ; ---------------------------------------------;
 
 proc OpenFile

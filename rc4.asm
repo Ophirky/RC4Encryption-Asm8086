@@ -3,23 +3,30 @@
 ; an encryption decryption library using the rc4 encryption  ;
 
 ; --------------------------------------------;
-; SUMMARY - Mixing the sched array with a     ;
-;           using a pseudo random location    ;
+; SUMMARY - Mixing an array that holds with   ;
+;           a values from 0 to 255 using a    ;
+;           pseudo random location            ;
 ;                                             ;
-; IN - the proc accepts the key using the     ;
-;      global var named key                   ; 
+; IN - SchedOffset, KeyOffset, KeyLen         ; 
 ;                                             ;
-; OUT - mixed sched arr                       ;
+; OUT - mixed scheduled array                 ;
 ; --------------------------------------------;
 proc keyScheduling
-    ; Mixing the sched (ds[0-255]) array ;
-    sched_offset equ 0
-    key_offset equ offset key
+    ; Local vars ;
+    sched_offset equ [bp+4]
+    key_offset equ [bp+6]
+    key_len equ [bp+8]
 
+    push bp
+    mov bp, sp
+
+    ; Mixing the sched (ds[0-255]) array ;
+    ; Starting the array ;
     mov cl, 0
     SetSchedArray0To255Two:
         mov bl,cl
         mov [byte ptr bx], cl
+
         inc cx
         cmp cx,256
         jb SetSchedArray0To255Two
@@ -28,14 +35,14 @@ proc keyScheduling
     xor bx,bx
     xor di,di
 
+    ; Loop to mix the Sched array ;
     MixSchedArray:
         ; while di < 256 ;
-
         add bl, [sched_offset+di]
 
         xor ax,ax
         mov ax, di
-        mov si, [word ptr key_arr_len]
+        mov si, [word ptr key_len]
         xor dx, dx
         div si
         mov si, dx
@@ -59,7 +66,8 @@ proc keyScheduling
         cmp di, 256
         jb MixSchedArray
         
-    ret
+    pop bp
+    ret 6
 endp keyScheduling
 
 
@@ -69,22 +77,30 @@ endp keyScheduling
 ;           or decrypts it if it's already    ;
 ;           encrypted                         ;
 ;                                             ;
-; IN - plain-text/cipher-text offset & key    ;
-;      offset through the stack               ;
+; IN - plain-text/cipher-text offset,         ;
+;      text length, sched offset, key offset  ;
+;      key length                             ;
 ;                                             ;
 ; OUT - plain/cipher text                     ;
 ; --------------------------------------------;
 proc encryptDecrypt
+
+    ; Local Variables ;
+    key_len equ [bp + 12]
+    key_offset equ [bp + 10]
+    sched_offset equ [bp + 8]
+    text_length equ [bp + 6]
+    text_offset equ [bp + 4]
+
+
     push bp
     mov bp,sp
 
-    text_offset equ [bp + 6]
-    text_length equ [bp + 4]
-    sched_offset equ offset sched
-
     ; KeyScheduling ;
+    push sched_offset
+    push key_offset
+    push key_len
     call keyScheduling
-
 
     ; Reseting everything ;
     xor ax,ax
@@ -116,6 +132,7 @@ proc encryptDecrypt
         ; switch 2 ;
         mov [sched_offset + bx], dl
 
+        ;--------------------------;
         ; Getting the stream value ;
         xor ax, ax
         mov al, [sched_offset + di]
@@ -138,5 +155,5 @@ proc encryptDecrypt
     loop EncryptionDecryptionLoop
 
     pop bp
-    ret 4
+    ret 10
 endp encryptDecrypt

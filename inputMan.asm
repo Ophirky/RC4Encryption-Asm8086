@@ -1,6 +1,6 @@
-; Written by: Ophir Nevo Michrowski                          ;
-; Name: mainFile.asm                                         ;
-; this is a file handler that manages the user interface     ;
+; Written by: Ophir Nevo Michrowski                       ;
+; Name: mainFile.asm                                      ;
+; this is a file handler that manages the user interface  ;
 
 ; File Defenition ;
 IDEAL
@@ -20,8 +20,9 @@ CODESEG
 
 
     ; Including the librarys ;
-    include "rc4.asm" ; encryption
-    include "scanner.asm" ; file and folder encryption
+    include "RC4.asm" ; encryption
+    include "FHandle.asm" ; file and folder encryption
+    include "GUI.asm" ; GUI elements
 
     ; Start ;
     start:
@@ -36,16 +37,35 @@ CODESEG
         mov [key_arr_len], 3
         mov [text_len], 11d
 
+
+        ; Pushing the values of the encrypt decrypt proc to stack ;
         push offset text
-        xor ax, ax
-        mov al, [byte ptr text_len]
+        
+        mov ax, [text_len]
         push ax
+
+        push offset sched
+        push offset key
+
+        mov ax, [key_arr_len]
+        push ax
+
+        ; Calling the encrypt decrypt proc ;
         call encryptDecrypt
 
+        ; Pushing the values of the encrypt decrypt proc to stack ;
         push offset text
-        xor ax, ax
-        mov al, [byte ptr text_len]
+        
+        mov ax, [text_len]
         push ax
+
+        push offset sched
+        push offset key
+
+        mov ax, [key_arr_len]
+        push ax
+
+        ; Calling the encrypt decrypt proc ;
         call encryptDecrypt
 
     ; Exit ;
