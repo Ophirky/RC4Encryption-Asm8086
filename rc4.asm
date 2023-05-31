@@ -3,30 +3,29 @@
 ; an encryption decryption library using the rc4 encryption  ;
 
 ; --------------------------------------------;
-; SUMMARY - Mixing an array that holds with   ;
-;           a values from 0 to 255 using a    ;
-;           pseudo random location            ;
+; SUMMARY - Mixing the sched array with a     ;
+;           using a pseudo random location    ;
 ;                                             ;
-; IN - SchedOffset, KeyOffset, KeyLen         ; 
+; IN - The proc accepts the key_offset,       ;
+;      key_len and sched_offset.              ; 
 ;                                             ;
-; OUT - mixed scheduled array                 ;
+; OUT - void                                  ;
 ; --------------------------------------------;
+
 proc keyScheduling
-    ; Local vars ;
+    ; Local Vars ;
+    key_offset equ [bp+8]
+    key_len equ [bp+6]
     sched_offset equ [bp+4]
-    key_offset equ [bp+6]
-    key_len equ [bp+8]
 
     push bp
     mov bp, sp
 
-    ; Mixing the sched (ds[0-255]) array ;
-    ; Starting the array ;
+    ; defining the sched array to 0-255 ;
     mov cl, 0
     SetSchedArray0To255Two:
         mov bl,cl
         mov [byte ptr bx], cl
-
         inc cx
         cmp cx,256
         jb SetSchedArray0To255Two
@@ -35,31 +34,45 @@ proc keyScheduling
     xor bx,bx
     xor di,di
 
-    ; Loop to mix the Sched array ;
     MixSchedArray:
         ; while di < 256 ;
-        add bl, [sched_offset+di]
+
+        add di, sched_offset
+        add bl, [di]
+        sub di, sched_offset
+
 
         xor ax,ax
         mov ax, di
-        mov si, [word ptr key_len]
+        mov si, key_len
         xor dx, dx
         div si
         mov si, dx
     
-        add bl, [key_offset+si]
+        add si, key_offset
+        add bl, [si]
+        sub si, key_offset
 
         ; Switching between two items in the sched array[bx,di] ;
         ; TMP variable ;
         xor bh,bh
-        mov cl, [sched_offset+di]
+        add di, sched_offset
+        mov cl, [di]
+        sub di, sched_offset
     
         ; switch 1 ;
-        mov al, [sched_offset+bx]
-        mov [sched_offset + di], al
+        add bx, sched_offset
+        mov al, [bx]
+        sub bx, sched_offset
+
+        add di, sched_offset
+        mov [di], al
+        sub di, sched_offset
     
         ; switch 2 ;
-        mov [sched_offset + bx], cl
+        add bx, sched_offset
+        mov [bx], cl
+        sub bx, sched_offset
     
         ; Increasing loop counter ;
         inc di
@@ -77,30 +90,29 @@ endp keyScheduling
 ;           or decrypts it if it's already    ;
 ;           encrypted                         ;
 ;                                             ;
-; IN - plain-text/cipher-text offset,         ;
-;      text length, sched offset, key offset  ;
-;      key length                             ;
+; IN - The Proc gets the plain-txt/cipher-txt ;
+;      offset, txt_len, sched_offset, key     ;
+;      offset & key_len through the stack     ;
 ;                                             ;
-; OUT - plain/cipher text                     ;
+; OUT - void                                  ;
 ; --------------------------------------------;
 proc encryptDecrypt
-
-    ; Local Variables ;
-    key_len equ [bp + 12]
-    key_offset equ [bp + 10]
+    ; Local Vars ;
+    text_offset equ [bp + 12]
+    text_length equ [bp + 10]
     sched_offset equ [bp + 8]
-    text_length equ [bp + 6]
-    text_offset equ [bp + 4]
-
+    key_offset equ [bp + 6]
+    key_len equ [bp + 4]
 
     push bp
     mov bp,sp
 
     ; KeyScheduling ;
-    push sched_offset
     push key_offset
     push key_len
+    push sched_offset
     call keyScheduling
+
 
     ; Reseting everything ;
     xor ax,ax
@@ -118,25 +130,42 @@ proc encryptDecrypt
         inc bl
 
         xor bh,bh
-        add di, [sched_offset + bx]
+        add bx, sched_offset
+        add di, [bx]
+        sub bx, sched_offset
         and di, 0ffh
 
         ; Switching between two items in the sched array[bx,di] ;
         ; TMP variable ;
-        mov dl, [sched_offset + di]
+        add di, sched_offset
+        mov dl, [di]
+        sub di, sched_offset
     
         ; switch 1 ;
-        mov al, [sched_offset + bx]
-        mov [sched_offset + di], al
+        add bx, sched_offset
+        mov al, [bx]
+        sub bx, sched_offset
+
+        add di, sched_offset
+        mov [di], al
+        sub di, sched_offset
     
         ; switch 2 ;
-        mov [sched_offset + bx], dl
+        add bx, sched_offset
+        mov [bx], dl
+        sub bx, sched_offset
 
-        ;--------------------------;
         ; Getting the stream value ;
         xor ax, ax
-        mov al, [sched_offset + di]
-        add al, [sched_offset + bx]
+    
+        add di, sched_offset
+        mov al, [di]
+        sub di, sched_offset
+
+        add bx, sched_offset
+        add al, [bx]
+        sub bx, sched_offset
+
         mov si, ax
 
         ; encryption or decryption ;
@@ -145,7 +174,10 @@ proc encryptDecrypt
         dec di
 
         ; next key stream byte in dl
-        mov dl, [sched_offset + si]  ; next stream byte - breakpoint
+        add si, sched_offset
+        mov dl, [si]
+        sub si, sched_offset
+        
         add di, text_offset
         xor [di], dl
 

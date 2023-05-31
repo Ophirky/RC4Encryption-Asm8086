@@ -1,6 +1,6 @@
-; Written by: Ophir Nevo Michrowski                       ;
-; Name: mainFile.asm                                      ;
-; this is a file handler that manages the user interface  ;
+; Written by: Ophir Nevo Michrowski                          ;
+; Name: mainFile.asm                                         ;
+; this is a file handler that manages the user interface     ;
 
 ; File Defenition ;
 IDEAL
@@ -12,7 +12,7 @@ DATASEG
     sched db 256 dup(?)
     key db 256 dup(?)
     key_arr_len dw 0
-    text db "Hello world", 245 dup(0)
+    text db "Hello World!", 245 dup(0)
     text_len dw 0
 
 ; Code ;
@@ -20,9 +20,8 @@ CODESEG
 
 
     ; Including the librarys ;
-    include "RC4.asm" ; encryption
-    include "FHandle.asm" ; file and folder encryption
-    include "GUI.asm" ; GUI elements
+    include "rc4.asm" ; encryption
+    ; include "scanner.asm" ; file and folder encryption
 
     ; Start ;
     start:
@@ -37,35 +36,24 @@ CODESEG
         mov [key_arr_len], 3
         mov [text_len], 11d
 
-
-        ; Pushing the values of the encrypt decrypt proc to stack ;
+        ; Encrypting ;
         push offset text
-        
-        mov ax, [text_len]
+        xor ax, ax
+        mov al, [byte ptr text_len]
         push ax
-
         push offset sched
         push offset key
-
-        mov ax, [key_arr_len]
-        push ax
-
-        ; Calling the encrypt decrypt proc ;
+        push [key_arr_len]
         call encryptDecrypt
 
-        ; Pushing the values of the encrypt decrypt proc to stack ;
+        ; Decrypting ;
         push offset text
-        
-        mov ax, [text_len]
+        xor ax, ax
+        mov al, [byte ptr text_len]
         push ax
-
         push offset sched
         push offset key
-
-        mov ax, [key_arr_len]
-        push ax
-
-        ; Calling the encrypt decrypt proc ;
+        push [key_arr_len]
         call encryptDecrypt
 
     ; Exit ;
