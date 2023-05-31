@@ -6,16 +6,22 @@
 ; SUMMARY - Mixing the sched array with a     ;
 ;           using a pseudo random location    ;
 ;                                             ;
-; IN - the proc accepts the key using the     ;
-;      global var named key                   ; 
+; IN - The proc accepts the key_offset,       ;
+;      key_len and sched_offset.              ; 
 ;                                             ;
-; OUT - mixed sched arr                       ;
+; OUT - void                                  ;
 ; --------------------------------------------;
-proc keyScheduling
-    ; Mixing the sched (ds[0-255]) array ;
-    sched_offset equ 0
-    key_offset equ offset key
 
+proc keyScheduling
+    ; Local Vars ;
+    key_offset equ [bp+8]
+    key_len equ [bp+6]
+    sched_offset equ [bp+4]
+
+    push bp
+    mov bp, sp
+
+    ; defining the sched array to 0-255 ;
     mov cl, 0
     SetSchedArray0To255Two:
         mov bl,cl
@@ -31,35 +37,50 @@ proc keyScheduling
     MixSchedArray:
         ; while di < 256 ;
 
-        add bl, [sched_offset+di]
+        add di, sched_offset
+        add bl, [di]
+        sub di, sched_offset
+
 
         xor ax,ax
         mov ax, di
-        mov si, [word ptr key_arr_len]
+        mov si, key_len
         xor dx, dx
         div si
         mov si, dx
     
-        add bl, [key_offset+si]
+        add si, key_offset
+        add bl, [si]
+        sub si, key_offset
 
         ; Switching between two items in the sched array[bx,di] ;
         ; TMP variable ;
         xor bh,bh
-        mov cl, [sched_offset+di]
+        add di, sched_offset
+        mov cl, [di]
+        sub di, sched_offset
     
         ; switch 1 ;
-        mov al, [sched_offset+bx]
-        mov [sched_offset + di], al
+        add bx, sched_offset
+        mov al, [bx]
+        sub bx, sched_offset
+
+        add di, sched_offset
+        mov [di], al
+        sub di, sched_offset
     
         ; switch 2 ;
-        mov [sched_offset + bx], cl
+        add bx, sched_offset
+        mov [bx], cl
+        sub bx, sched_offset
     
         ; Increasing loop counter ;
         inc di
         cmp di, 256
         jb MixSchedArray
         
-    ret
+    pop bp
+    ret 6
 endp keyScheduling
 
 
@@ -69,20 +90,27 @@ endp keyScheduling
 ;           or decrypts it if it's already    ;
 ;           encrypted                         ;
 ;                                             ;
-; IN - plain-text/cipher-text offset & key    ;
-;      offset through the stack               ;
+; IN - The Proc gets the plain-txt/cipher-txt ;
+;      offset, txt_len, sched_offset, key     ;
+;      offset & key_len through the stack     ;
 ;                                             ;
-; OUT - plain/cipher text                     ;
+; OUT - void                                  ;
 ; --------------------------------------------;
 proc encryptDecrypt
+    ; Local Vars ;
+    text_offset equ [bp + 12]
+    text_length equ [bp + 10]
+    sched_offset equ [bp + 8]
+    key_offset equ [bp + 6]
+    key_len equ [bp + 4]
+
     push bp
     mov bp,sp
 
-    text_offset equ [bp + 6]
-    text_length equ [bp + 4]
-    sched_offset equ offset sched
-
     ; KeyScheduling ;
+    push key_offset
+    push key_len
+    push sched_offset
     call keyScheduling
 
 
@@ -102,24 +130,42 @@ proc encryptDecrypt
         inc bl
 
         xor bh,bh
-        add di, [sched_offset + bx]
+        add bx, sched_offset
+        add di, [bx]
+        sub bx, sched_offset
         and di, 0ffh
 
         ; Switching between two items in the sched array[bx,di] ;
         ; TMP variable ;
-        mov dl, [sched_offset + di]
+        add di, sched_offset
+        mov dl, [di]
+        sub di, sched_offset
     
         ; switch 1 ;
-        mov al, [sched_offset + bx]
-        mov [sched_offset + di], al
+        add bx, sched_offset
+        mov al, [bx]
+        sub bx, sched_offset
+
+        add di, sched_offset
+        mov [di], al
+        sub di, sched_offset
     
         ; switch 2 ;
-        mov [sched_offset + bx], dl
+        add bx, sched_offset
+        mov [bx], dl
+        sub bx, sched_offset
 
         ; Getting the stream value ;
         xor ax, ax
-        mov al, [sched_offset + di]
-        add al, [sched_offset + bx]
+    
+        add di, sched_offset
+        mov al, [di]
+        sub di, sched_offset
+
+        add bx, sched_offset
+        add al, [bx]
+        sub bx, sched_offset
+
         mov si, ax
 
         ; encryption or decryption ;
@@ -128,7 +174,10 @@ proc encryptDecrypt
         dec di
 
         ; next key stream byte in dl
-        mov dl, [sched_offset + si]  ; next stream byte - breakpoint
+        add si, sched_offset
+        mov dl, [si]
+        sub si, sched_offset
+        
         add di, text_offset
         xor [di], dl
 
@@ -138,5 +187,5 @@ proc encryptDecrypt
     loop EncryptionDecryptionLoop
 
     pop bp
-    ret 4
+    ret 10
 endp encryptDecrypt

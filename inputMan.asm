@@ -12,7 +12,7 @@ DATASEG
     sched db 256 dup(?)
     key db 256 dup(?)
     key_arr_len dw 0
-    text db "Hello world", 245 dup(0)
+    text db "Hello World!", 245 dup(0)
     text_len dw 0
 
 ; Code ;
@@ -40,12 +40,18 @@ CODESEG
         xor ax, ax
         mov al, [byte ptr text_len]
         push ax
+        push offset sched
+        push offset key
+        push [key_arr_len]
         call encryptDecrypt
 
         push offset text
         xor ax, ax
         mov al, [byte ptr text_len]
         push ax
+        push offset sched
+        push offset key
+        push [key_arr_len]
         call encryptDecrypt
 
     ; Exit ;
