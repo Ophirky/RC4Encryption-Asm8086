@@ -3,42 +3,77 @@ MODEL small
 STACK 100h
 
 DATASEG
-    sched db 255 dup(?)
-    sched2 db 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255
-    key db ?
+
+    fileName db "file.txt", 0
+    fileHandle dw ?
+    errorMsg db "Error", 10, 13, '$'
+    fileReadBuffer db 255 dup(?), '$'
+    textToWrite db 'Hello World!'
 
 CODESEG
+    proc OpenFile
+        ; setting the int params ;
+        mov ah, 3Dh
+
+        mov al, 2
+
+        lea dx, [fileName]
+        int 21h
+
+        ; Error handling ;
+        jc printError
+
+        mov [fileHandle], ax
+        ret
+
+        printError:
+            mov dx, offset errorMsg
+            mov ah, 9h
+            int 21h
+        ret
+    endp OpenFile
+
+    proc ReadFile
+        mov ah, 3Fh
+        mov bx, [fileHandle]
+        mov cx, 255
+        mov dx, offset fileReadBuffer
+        int 21h
+        ret
+    endp ReadFile
+
+    proc CloseFile
+        mov ah,3Eh
+        mov bx, [filehandle]
+        int 21h
+        ret
+    endp CloseFile
+
+    proc WriteToFile
+        mov ah, 40h
+        mov bx, [fileHandle]
+        mov cx, 12
+        mov dx, offset textToWrite
+        int 21h
+        ret
+    endp WriteToFile
+
     start:
         mov ax, @data
         mov ds, ax
 
-        ; Setting the sched array to 0-255 ;
-        ; Option 1 ;
-        xor bx,bx
-        SetSchedArray0To255:
-            cmp bx, 256d
-            je SetSchedArray0To255End
+        call OpenFile
+        call ReadFile
 
-            mov [bx], bx
-            inc bx
-            jmp SetSchedArray0To255
+        WhileFileIsNotOver:
+            call ReadFile
+        cmp ax, 0
+        jne WhileFileIsNotOver
 
-        SetSchedArray0To255End:
-
-        ; option 1.5 ;
-        mov cl, 255d
-        SetSchedArray0To255Two:
-            mov [bl], cl
-            dec cl
-            cmp cl,0
-            ja SetSchedArray0To255Two
-
-        ; Option 2 - not working ;
-        mov dx, 255d
-        SetSchedArray0To255:
-            mov bx, dx
-            mov [bx], bx
-        loop SetSchedArray0To255
+        call CloseFile
+        ; call OpenFile
+        ; call WriteToFile
+        ; call CloseFile
 
     exit:
         mov ax, 4c00h

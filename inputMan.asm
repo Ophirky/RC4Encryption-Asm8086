@@ -9,19 +9,28 @@ STACK 100h
 
 ; Global Variables ;
 DATASEG
+    ; encryption vars ;
     sched db 256 dup(?)
     key db 256 dup(?)
-    key_arr_len dw 0
-    text db "Hello World!", 245 dup(0)
-    text_len dw 0
+    keyLen dw 0
+    text db "Hello World!", 245 dup(?)
+    ; text db 255 dup(?), 10, 13, '$'
+    textLen dw 0
+
+    ; file vars ;
+    fileName db "file.txt", 0
+    fileHandle dw ?
+    errorMsg db "Error", 10, 13, '$'
+    fileReadBuffer db 255 dup(?), '$'
+    textToWrite db 'Hello World!'
 
 ; Code ;
 CODESEG
 
 
     ; Including the librarys ;
-    include "rc4.asm" ; encryption
-    ; include "scanner.asm" ; file and folder encryption
+    include "rc4.inc" ; encryption
+    include "FHandle.inc" ; file and folder encryption
 
     ; Start ;
     start:
@@ -29,31 +38,62 @@ CODESEG
         mov ax, @data
         mov ds, ax
 
+        ; push offset fileName
+        ; push offset fileHandle
+        ; push 00000010b
+        ; call OpenFile
+
+        ; push offset text
+        ; push [fileHandle]
+        ; call ReadFile
+
+        ; mov dx, offset text
+        ; mov ah, 9h
+        ; int 21h
+
+        ; push [fileHandle]
+        ; call CloseFile
+
+        ; push offset fileName
+        ; push offset fileHandle
+        ; push 00000010b
+        ; call OpenFile
+
+        ; mov [textLen], 12d
+        ; push offset textToWrite
+        ; push [textLen]
+        ; push [fileHandle]
+        ; call WriteToFile
+
+        ; push [fileHandle]
+        ; call CloseFile
+        
+
         ; PlaceHolder key ;
         mov [offset key], 31d
         mov [offset key+1], 21d
         mov [offset key+2], 11d
-        mov [key_arr_len], 3
-        mov [text_len], 11d
+        mov [keyLen], 3
+        mov [textLen], 11d
 
         ; Encrypting ;
         push offset text
         xor ax, ax
-        mov al, [byte ptr text_len]
+        mov al, [byte ptr textLen]
         push ax
         push offset sched
         push offset key
-        push [key_arr_len]
+        push [keyLen]
         call encryptDecrypt
 
         ; Decrypting ;
         push offset text
         xor ax, ax
-        mov al, [byte ptr text_len]
+        mov al, [byte ptr textLen]
         push ax
         push offset sched
         push offset key
-        push [key_arr_len]
+        push [keyLen]
         call encryptDecrypt
 
     ; Exit ;

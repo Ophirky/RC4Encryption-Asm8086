@@ -66,7 +66,7 @@ def decrypt(ciphertext, key):
 
 if __name__ == '__main__':
     while True:
-        print(encrypt("Hello world", "\x31\x21\x11"))
+        print(encrypt("Hello world!", "\x31\x21\x11"))
         ed = input('Enter E for Encrypt, or D for Decrypt: ').upper()
         if ed == 'E':
             plaintext = input('Enter your plaintext: ')
