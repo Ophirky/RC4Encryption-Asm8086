@@ -21,7 +21,7 @@ CODESEG
 
     ; Including the librarys ;
     include "rc4.asm" ; encryption
-    include "scanner.asm" ; file and folder encryption
+    ; include "scanner.asm" ; file and folder encryption
 
     ; Start ;
     start:
