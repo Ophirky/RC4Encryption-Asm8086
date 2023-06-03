@@ -22,7 +22,8 @@ proc keyScheduling
     mov bp, sp
 
     ; defining the sched array to 0-255 ;
-    mov cl, 0
+    xor cx,cx
+    xor bx,bx
     SetSchedArray0To255Two:
         mov bl,cl
         mov [byte ptr bx], cl
