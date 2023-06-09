@@ -13,22 +13,6 @@ macro PrintLine lineOffset
 endm PrintLine
 
 ; ---------------------------------------------;
-; SUMMARY - Clears The Console                 ;
-;                                              ;
-; IN - None                                    ;
-;                                              ;
-; OUT - void                                   ;
-; ---------------------------------------------;
-macro ClearConsole
-    mov ah, 06h
-    xor al, al
-    xor bh, bh
-    mov cx, 0
-    mov dx, 184Fh
-    int 10h
-endm ClearConsole
-
-; ---------------------------------------------;
 ; SUMMARY - Prints a new line                  ;
 ;                                              ;
 ; IN - None                                    ;
@@ -50,7 +34,6 @@ endm PrintNewLine
 ; OUT - void                                   ;
 ; ---------------------------------------------;
 proc PrintRc4Title
-    ; ClearConsole
     PrintNewLine
     lea cx, [titleLine0]
     PrintLine cx
@@ -85,7 +68,6 @@ endp PrintRc4Title
 ; OUT - void                                   ;
 ; ---------------------------------------------;
 proc PrintTxtTitle
-    ; ClearConsole
     PrintNewLine
     lea cx, [textTitleLine0]
     PrintLine cx
@@ -114,7 +96,6 @@ endp PrintTxtTitle
 ; OUT - void                                   ;
 ; ---------------------------------------------;
 proc PrintFileTitle
-    ; ClearConsole
     PrintNewLine
     lea cx, [fileTitleLine0]
     PrintLine cx

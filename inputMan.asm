@@ -53,15 +53,17 @@ DATASEG
     fileTitleLine7 db "\__|     \______|\________|\________| \______/", 10, 13, "$"
 
     ; Errors ;
-    fileNotFound db "File not found!",10,13,"$"
-    toManyFilesOpen db "to many files many", 10, 13, "$"
-    accessDenied db "file access denied", 10, 13, "$"
-    invalidInput db "Invalid input", 10, 13, "$"
+    fileNotFound db "File not found",10,13,"$"
+    toManyFilesOpen db "To many files open", 10, 13, "$"
+    accessDenied db "File access denied", 10, 13, "$"
+    invalidInputError db "Invalid input", 10, 13, "$"
+    fileCreationError db "File creation error", 10, 13, "$"
+    noKeyEntered db "Secret key is mendatory", 10, 13, "$"
 
     ; texts ;
     fileOrText db "Enter 'F' for file or 'T' for plain text: ","$"
     textInput db "Enter plain text [up-to 255 chars]: ", "$"
-    filePathInput db "Enter the file path [file name up-to 5 chars]: ", "$"
+    filePathInput db "Enter the file path [file path up-to 254 chars]: ", "$"
     keyInput db "Enter your secret key: ", "$"
     resultOutput db "result: ", "$"
 
@@ -71,8 +73,6 @@ DATASEG
     fileName db 256 dup(?), 0
     fileHandle dw ?
     rc4FileHandle dw ?
-    errorMsg db "Error", 10, 13, '$'
-    ; textToWrite db "Hello World!"
 
 ; Code ;
 CODESEG
@@ -113,12 +113,13 @@ CODESEG
         jmp workOnRaw
         checkForLowerCase:
             cmp al, 't'
-            jne invalidInputError
+            jne invalidInputErrorJump
             jmp workOnRaw
 
         
         ; Input Invalid ;
-        invalidInputError:
+        invalidInputErrorJump:
+            PrintNewLine
             mov cx, offset invalidInputError
             printLine cx
             jmp exit
@@ -139,6 +140,14 @@ CODESEG
             mov dl, [byte ptr bx+1]
             xor dh,dh
             mov [keyLen], dx
+
+            cmp [keyLen], 0
+            jne NoFileKeyInputError
+            PrintNewLine
+            lea cx, [noKeyEntered]
+            PrintLine cx
+            jmp exit
+            NoFileKeyInputError:
 
             ; Getting the path from the user ;
             mov cx, offset filePathInput
@@ -176,6 +185,14 @@ CODESEG
             mov dl, [byte ptr bx+1]
             xor dh,dh
             mov [keyLen], dx
+
+            cmp [keyLen], 0
+            jne NoTextKeyInputError
+            PrintNewLine
+            lea cx, [noKeyEntered]
+            PrintLine cx
+            jmp exit
+            NoTextKeyInputError:
 
             ; Getting the text from the user ;
             mov cx, offset textInput

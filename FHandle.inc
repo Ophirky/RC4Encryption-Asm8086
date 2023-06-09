@@ -201,10 +201,35 @@ proc FileEncryptDecrypt
     push file_handle_offset
     push 0
     call OpenFile
+    jnc NoFileOpenError1
+    
+    cmp ax, 2
+    jne OpenFile1ToManyFilesOpenException
+    PrintNewLine
+    mov cx, offset fileNotFound
+    PrintLine cx
+    jmp exit
+
+    OpenFile1ToManyFilesOpenException:
+        cmp ax, 5
+        jne OpenFile1AcessDenied
+        PrintNewLine
+        mov cx, offset toManyFilesOpen
+        PrintLine cx
+        jmp exit
+
+    OpenFile1AcessDenied:
+        cmp ax, 12
+        jne NoFileOpenError1
+        PrintNewLine
+        mov cx, offset accessDenied
+        PrintLine cx
+        jmp exit
+
+    NoFileOpenError1:
 
     ; adding the prefix to the processed file path ;  
     mov si, file_path        ; Load the address of the path string
-    ; mov di, offset prefix      ; Load the address of the prefix string
 
     ; Find the position of the last backslash (\) in the path
     mov cx, file_path                  ; Counter for the position of the last backslash
@@ -228,7 +253,9 @@ proc FileEncryptDecrypt
     ; Print the modified path
         mov si,cx
         dec bx
+        ; dec cx
         add bx, file_path
+
         shrItems:
             mov al, [bx]
             mov [bx+1], al
@@ -236,7 +263,7 @@ proc FileEncryptDecrypt
             cmp bx,cx
             jne shrItems
         
-        mov bx, cx
+        inc bx
         mov [byte ptr bx], 'e'    
 
     ; creating the processed file ;
@@ -247,6 +274,31 @@ proc FileEncryptDecrypt
     push processed_file_handle_offset
     push 1
     call OpenFile
+
+    cmp ax, 2
+    jne OpenFile2ToManyFilesOpenException
+    PrintNewLine
+    mov cx, offset fileNotFound
+    PrintLine cx
+    jmp exit
+
+    OpenFile2ToManyFilesOpenException:
+        cmp ax, 5
+        jne OpenFile2AcessDenied
+        PrintNewLine
+        mov cx, offset toManyFilesOpen
+        PrintLine cx
+        jmp exit
+
+    OpenFile2AcessDenied:
+        cmp ax, 12
+        jne NoFileOpenError2
+        PrintNewLine
+        mov cx, offset accessDenied
+        PrintLine cx
+        jmp exit
+
+    NoFileOpenError2:
 
     ; reading the file and encrypting it ;
     mov si, 0
